@@ -108,18 +108,19 @@ public class RentalManageService {
                 throw new Exception("Stock not found.");
             }
  
-            RentalManage rentalManage = new RentalManage();
-            rentalManage = setRentalStatusDate(rentalManage, rentalManageDto.getStatus());
- 
-            rentalManage.setId(rentalManageDto.getId());
-            rentalManage.setAccount(account);
-            rentalManage.setExpectedRentalOn(rentalManageDto.getExpectedRentalOn());
-            rentalManage.setExpectedReturnOn(rentalManageDto.getExpectedReturnOn());
-            rentalManage.setStatus(rentalManageDto.getStatus());
-            rentalManage.setStock(stock);
+            RentalManage updateTargetRental = this.rentalManageRepository.findById(id).orElse(null);
+            if (updateTargetRental == null){
+                throw new Exception("RentalManage not found");
+            }
+            updateTargetRental.setId(rentalManageDto.getId());
+            updateTargetRental.setAccount(account);
+            updateTargetRental.setExpectedRentalOn(rentalManageDto.getExpectedRentalOn());
+            updateTargetRental.setExpectedReturnOn(rentalManageDto.getExpectedReturnOn());
+            updateTargetRental.setStatus(rentalManageDto.getStatus());
+            updateTargetRental.setStock(stock);
  
             // データベースへの保存
-            this.rentalManageRepository.save(rentalManage);
+            this.rentalManageRepository.save(updateTargetRental);
         } catch (Exception e) {
             throw e;
         }
