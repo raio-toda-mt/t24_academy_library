@@ -2,6 +2,7 @@ package jp.co.metateam.library.controller;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
+import jp.co.metateam.library.model.Account;
 import jp.co.metateam.library.model.BookMst;
+import jp.co.metateam.library.model.BookStockInfo;
 import jp.co.metateam.library.model.Stock;
 import jp.co.metateam.library.model.StockDto;
 import jp.co.metateam.library.service.BookMstService;
@@ -23,20 +26,23 @@ import jp.co.metateam.library.service.StockService;
 import jp.co.metateam.library.values.StockStatus;
 import lombok.extern.log4j.Log4j2;
 
+import jp.co.metateam.library.repository.BookMstRepository;
+
 /**
  * 在庫情報関連クラス
  */
 @Log4j2
 @Controller
 public class StockController {
-
+    private final BookMstRepository bookMstRepository;
     private final BookMstService bookMstService;
     private final StockService stockService;
 
     @Autowired
-    public StockController(BookMstService bookMstService, StockService stockService) {
+    public StockController(BookMstService bookMstService, StockService stockService, BookMstRepository bookMstRepository) {
         this.bookMstService = bookMstService;
         this.stockService = stockService;
+        this.bookMstRepository = bookMstRepository;
     }
 
     @GetMapping("/stock/index")
@@ -143,7 +149,7 @@ public class StockController {
         Integer daysInMonth = startDate.lengthOfMonth();
 
         List<Object> daysOfWeek = this.stockService.generateDaysOfWeek(targetYear, targetMonth, startDate, daysInMonth);
-        List<String> stocks = this.stockService.generateValues(targetYear, targetMonth, daysInMonth);
+        List<BookStockInfo> stocks = this.stockService.generateValues(targetYear, targetMonth, daysInMonth);
 
         model.addAttribute("targetYear", targetYear);
         model.addAttribute("targetMonth", targetMonth);
@@ -151,6 +157,9 @@ public class StockController {
         model.addAttribute("daysInMonth", daysInMonth);
 
         model.addAttribute("stocks", stocks);
+
+        List<BookMst> books = this.bookMstRepository.findAll();
+        model.addAttribute("books", books);
 
         return "stock/calendar";
     }

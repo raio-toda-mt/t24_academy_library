@@ -1,9 +1,12 @@
 package jp.co.metateam.library.controller;
 
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
  
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
  
 import jakarta.validation.Valid;
@@ -65,7 +69,7 @@ public class RentalManageController {
     }
 
     @GetMapping("/rental/add")
-    public String add(Model model) {
+    public String add(@RequestParam(required = false) String stockId, @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date expectedRentalOn, Model model) {
         List<Account> accounts = this.accountService.findAll();
 
         List <Stock> stockList = this.stockService.findStockAvailableAll();
@@ -75,17 +79,35 @@ public class RentalManageController {
         model.addAttribute("rentalStatus", RentalStatus.values());
 
         if (!model.containsAttribute("rentalManageDto")) {
-            model.addAttribute("rentalManageDto", new RentalManageDto());
-        }
         
-        return "rental/add";
+
+        RentalManageDto rentalManageDto = new RentalManageDto();
+    
+        if (stockId != null && expectedRentalOn != null) {
+        // URLパラメーターが提供されている場合、値をセットする
+        rentalManageDto.setStockId(stockId);
+        rentalManageDto.setExpectedRentalOn(expectedRentalOn);
+        //rentalManageDto.setExpectedRentalOn(rentalManage.getExpectedRentalOn());
     }
+
+    model.addAttribute("rentalManageDto", rentalManageDto);
+}
+
+    return "rental/add";
+}
 
     @PostMapping("/rental/add")
     public String save(@Valid @ModelAttribute RentalManageDto rentalManageDto, BindingResult result, RedirectAttributes ra) {
         try {
             if (result.hasErrors()) {
                 throw new Exception("Validation error.");
+            }
+
+            Optional<String> b = rentalManageService.accountcheck(rentalManageDto.getEmployeeId());
+            if (b.isPresent()){
+                FieldError fieldError = new FieldError("rentalManageDto","employeeId",b.get());
+                result.addError(fieldError);
+                throw new Exception("Validetion error");
             }
 
          Optional<String> vaidErrOptional = rentalManageDto.addError(rentalManageDto.getStatus(), rentalManageDto.getExpectedRentalOn());
@@ -152,6 +174,13 @@ public class RentalManageController {
              throw new Exception("Validation error.");
          }
 
+         Optional<String> name = rentalManageService.accountcheck(rentalManageDto.getEmployeeId());
+                   if (name.isPresent()){
+                       FieldError fieldError = new FieldError("rentalManageDto","employeeId",name.get());
+                       result.addError(fieldError);
+                       throw new Exception("Validetion error");
+                   }
+
          RentalManage rentalManage = this.rentalManageService.findById(Long.valueOf(id));
          Optional<String> vaidErrOptional = rentalManageDto.isStatusError(rentalManage.getStatus(),rentalManageDto.getStatus(), rentalManageDto.getExpectedRentalOn(), rentalManageDto.getExpectedReturnOn());
             if (vaidErrOptional.isPresent()){
@@ -162,7 +191,7 @@ public class RentalManageController {
 
                 Optional<String> a = rentalManageService.rentalAble(rentalManageDto.getStockId(), rentalManageDto.getId(), new java.sql.Date(rentalManageDto.getExpectedRentalOn().getTime()),  new java.sql.Date(rentalManageDto.getExpectedReturnOn().getTime()));
                    if (a.isPresent()){
-                       FieldError fieldError = new FieldError("rentalManageDto","status",a.get());
+                       FieldError fieldError = new FieldError("rentalManageDto","stockId",a.get());
                        result.addError(fieldError);
                        throw new Exception("Validetion error");
                    }
@@ -184,6 +213,7 @@ public class RentalManageController {
 
          ra.addFlashAttribute("rentalManageDto", rentalManageDto);
          ra.addFlashAttribute("org.springframework.validation.BindingResult.rentalManageDto", result);
+
 
          //return "redirect:/rental/edit";
          return String.format("redirect:/rental/%s/edit", id);

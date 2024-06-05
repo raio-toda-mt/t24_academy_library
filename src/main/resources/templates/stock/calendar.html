@@ -36,9 +36,17 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <!-- FIXME ControllerやService側の処理とともに表示方法を考える -->
-                                <td th:each="stock, stat : ${stocks}" th:text="${stock}"></td>
+                           <tr th:each="x : ${stocks}">
+                            <td th:text = "${x.title}"></td>
+                            <td th:text = "${x.totalCount}"></td>
+                            <th:block th:each = "stock, stat : ${x.dailyDtail}">
+                                <th:block th:if = "${stock.dailyCount == 0}">
+                                    <td>x</td>
+                                </th:block>
+                                <th:block th:if = "${stock.dailyCount >= 1}">
+                                  <td> <a th:text="${stock.dailyCount}" th:href="@{/rental/add(stockId=${stock.stockId}, expectedRentalOn=${#dates.format(stock.expectedRentalOn, 'yyyy-MM-dd')})}" class="link"></a></td>
+                                </th:block>
+                            </th:block>
                             </tr>
                         </tbody>
                     </table>
