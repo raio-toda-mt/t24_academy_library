@@ -18,7 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.validation.Valid;
 import jp.co.metateam.library.model.Account;
 import jp.co.metateam.library.model.BookMst;
-import jp.co.metateam.library.model.BookStockInfo;
+import jp.co.metateam.library.model.CalendarDto;
 import jp.co.metateam.library.model.Stock;
 import jp.co.metateam.library.model.StockDto;
 import jp.co.metateam.library.service.BookMstService;
@@ -39,7 +39,8 @@ public class StockController {
     private final StockService stockService;
 
     @Autowired
-    public StockController(BookMstService bookMstService, StockService stockService, BookMstRepository bookMstRepository) {
+    public StockController(BookMstService bookMstService, StockService stockService,
+            BookMstRepository bookMstRepository) {
         this.bookMstService = bookMstService;
         this.stockService = stockService;
         this.bookMstRepository = bookMstRepository;
@@ -47,7 +48,7 @@ public class StockController {
 
     @GetMapping("/stock/index")
     public String index(Model model) {
-        List <Stock> stockList = this.stockService.findAll();
+        List<Stock> stockList = this.stockService.findAll();
 
         model.addAttribute("stockList", stockList);
 
@@ -119,7 +120,8 @@ public class StockController {
     }
 
     @PostMapping("/stock/{id}/edit")
-    public String update(@PathVariable("id") String id, @Valid @ModelAttribute StockDto stockDto, BindingResult result, RedirectAttributes ra) {
+    public String update(@PathVariable("id") String id, @Valid @ModelAttribute StockDto stockDto, BindingResult result,
+            RedirectAttributes ra) {
         try {
             if (result.hasErrors()) {
                 throw new Exception("Validation error.");
@@ -139,7 +141,8 @@ public class StockController {
     }
 
     @GetMapping("/stock/calendar")
-    public String calendar(@RequestParam(required = false) Integer year, @RequestParam(required = false) Integer month, Model model) {
+    public String calendar(@RequestParam(required = false) Integer year, @RequestParam(required = false) Integer month,
+            Model model) {
 
         LocalDate today = year == null || month == null ? LocalDate.now() : LocalDate.of(year, month, 1);
         Integer targetYear = year == null ? today.getYear() : year;
@@ -148,18 +151,16 @@ public class StockController {
         LocalDate startDate = LocalDate.of(targetYear, targetMonth, 1);
         Integer daysInMonth = startDate.lengthOfMonth();
 
-        List<Object> daysOfWeek = this.stockService.generateDaysOfWeek(targetYear, targetMonth, startDate, daysInMonth);
-        List<BookStockInfo> stocks = this.stockService.generateValues(targetYear, targetMonth, daysInMonth);
+        List<Object> daysOfWeekList = this.stockService.generateDaysOfWeek(targetYear, targetMonth, startDate,
+                daysInMonth);
+        List<CalendarDto> calendarList = this.stockService.generateValues(targetYear, targetMonth, daysInMonth);
 
         model.addAttribute("targetYear", targetYear);
         model.addAttribute("targetMonth", targetMonth);
-        model.addAttribute("daysOfWeek", daysOfWeek);
+        model.addAttribute("daysOfWeek", daysOfWeekList);
         model.addAttribute("daysInMonth", daysInMonth);
 
-        model.addAttribute("stocks", stocks);
-
-        List<BookMst> books = this.bookMstRepository.findAll();
-        model.addAttribute("books", books);
+        model.addAttribute("stocks", calendarList);
 
         return "stock/calendar";
     }
