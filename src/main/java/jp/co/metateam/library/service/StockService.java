@@ -121,8 +121,8 @@ public class StockService {
 
         List<CalendarDto> values = new ArrayList<>();
 
-        for (int i = 0; i < books.size(); i++) {
-            BookMst book = books.get(i);
+        for (int bookList = 0; bookList < books.size(); bookList++) {
+            BookMst book = books.get(bookList);
             // values.put(book.getTitle()); // 対象の書籍名
 
             List<Stock> stockCount = this.stockRepository.findByBookMstIdAndStatus(book.getId(),
@@ -137,13 +137,13 @@ public class StockService {
             // a.add(stockCount.size());
             List<DailyDuplication> dailyDuplication = new ArrayList<>();
 
-            for (int n = 1; n <= daysInMonth; n++) {
+            for (int dayOfMonth = 1; dayOfMonth <= daysInMonth; dayOfMonth++) {
                 // LocalDate startDate = LocalDate.of(year, month, n);
 
                 Calendar cl = Calendar.getInstance();
                 cl.set(Calendar.YEAR, year);
                 cl.set(Calendar.MONTH, month - 1);
-                cl.set(Calendar.DATE, n);
+                cl.set(Calendar.DATE, dayOfMonth);
                 Date date = new Date();
                 date = cl.getTime();
 

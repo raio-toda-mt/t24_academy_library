@@ -39,7 +39,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="book : ${stocks}">
+                            <tr th:each="book : ${calendarList}">
                                 <td th:text="${book.title}"></td>
                                 <td th:text="${book.totalCount}"></td>
                                 <th:block th:each="stock, stat : ${book.dailyDetail}">
