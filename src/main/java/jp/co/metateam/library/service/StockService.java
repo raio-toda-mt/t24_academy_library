@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jp.co.metateam.library.constants.Constants;
-import jp.co.metateam.library.model.DailyDuplication;
+import jp.co.metateam.library.model.Lendable_date;
 //import jp.co.metateam.library.model.Account;
 import jp.co.metateam.library.model.BookMst;
 import jp.co.metateam.library.model.CalendarDto;
@@ -135,7 +135,7 @@ public class StockService {
 
             // List<Integer> a = new ArrayList<>();
             // a.add(stockCount.size());
-            List<DailyDuplication> dailyDuplication = new ArrayList<>();
+            List<Lendable_date> dailyDuplication = new ArrayList<>();
 
             for (int dayOfMonth = 1; dayOfMonth <= daysInMonth; dayOfMonth++) {
                 // LocalDate startDate = LocalDate.of(year, month, n);
@@ -147,7 +147,7 @@ public class StockService {
                 Date date = new Date();
                 date = cl.getTime();
 
-                DailyDuplication dailyList = new DailyDuplication();
+                Lendable_date dailyList = new Lendable_date();
                 List<Object[]> stockList = stockRepository.calendar(book.getId(), date);
                 stockList.size();
 
