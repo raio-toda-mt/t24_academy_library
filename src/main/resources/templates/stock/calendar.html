@@ -15,9 +15,13 @@
             <div class="inner_contens">
                 <div class="page_title">在庫カレンダー</div>
                 <div class="month_change mb30">
-                    <div><a th:href="@{/stock/calendar(year=2024,month=*{targetMonth-1})}">前月</a></div>
+                    <div><a
+                            th:href="@{/stock/calendar(year=__${targetYear}__,month=__${(targetMonth == 1 ? 12 : targetMonth - 1)}__)}">前月</a>
+                    </div>
                     <div th:text="${targetYear + '年' + targetMonth + '月'}"></div>
-                    <div><a th:href="@{/stock/calendar(year=2024,month=*{targetMonth+1})}">翌月</a></div>
+                    <div><a
+                            th:href="@{/stock/calendar(year=__${(targetMonth == 12 ? targetYear + 1 : targetYear)}__,month=__${(targetMonth == 12 ? 1 : targetMonth + 1)}__)}">翌月</a>
+                    </div>
                 </div>
 
                 <div class="table_wrapper">

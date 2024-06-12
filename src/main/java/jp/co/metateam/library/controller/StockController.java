@@ -144,9 +144,16 @@ public class StockController {
     public String calendar(@RequestParam(required = false) Integer year, @RequestParam(required = false) Integer month,
             Model model) {
 
-        LocalDate today = year == null || month == null ? LocalDate.now() : LocalDate.of(year, month, 1);
+        LocalDate today = (year == null || month == null) ? LocalDate.now() : LocalDate.of(year, month, 1);
         Integer targetYear = year == null ? today.getYear() : year;
         Integer targetMonth = today.getMonthValue();
+        if (month != null && (month < 1 || month > 12)) {
+            // 不正な月の値が渡された場合の処理
+            // 例えば、デフォルトで1月に設定するなど
+            targetMonth = 1;
+        } else {
+            targetMonth = month == null ? today.getMonthValue() : month;
+        }
 
         LocalDate startDate = LocalDate.of(targetYear, targetMonth, 1);
         Integer daysInMonth = startDate.lengthOfMonth();

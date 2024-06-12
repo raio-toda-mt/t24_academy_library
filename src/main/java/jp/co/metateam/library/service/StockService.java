@@ -148,7 +148,7 @@ public class StockService {
                 date = cl.getTime();
 
                 DailyDuplication dailyList = new DailyDuplication();
-                List<Object[]> stockList = stockRepository.calender(book.getId(), date);
+                List<Object[]> stockList = stockRepository.calendar(book.getId(), date);
                 stockList.size();
 
                 dailyList.setDailyCount(stockList.size());
