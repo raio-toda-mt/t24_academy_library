@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="~{common :: meta_header('在庫カレンダー',~{::link},~{::script})}">
     <title th:text="${title}+' | MTLibrary'"></title>
     <link rel="stylesheet" th:href="@{/css/stock/calendar.css}" />
     <script type="text/javascript" th:src="@{/js/stock/add.js}"></script>
 </head>
+
 <body>
     <div class="contents">
         <div th:replace="~{common :: main_sidebar}"></div>
@@ -13,9 +15,13 @@
             <div class="inner_contens">
                 <div class="page_title">在庫カレンダー</div>
                 <div class="month_change mb30">
-                    <div><a th:href="@{/stock/calendar(year=2024,month=*{targetMonth-1})}">前月</a></div>
+                    <div><a
+                            th:href="@{/stock/calendar(year=__${targetYear}__,month=__${(targetMonth == 1 ? 12 : targetMonth - 1)}__)}">前月</a>
+                    </div>
                     <div th:text="${targetYear + '年' + targetMonth + '月'}"></div>
-                    <div><a th:href="@{/stock/calendar(year=2024,month=*{targetMonth+1})}">翌月</a></div>
+                    <div><a
+                            th:href="@{/stock/calendar(year=__${(targetMonth == 12 ? targetYear + 1 : targetYear)}__,month=__${(targetMonth == 12 ? 1 : targetMonth + 1)}__)}">翌月</a>
+                    </div>
                 </div>
 
                 <div class="table_wrapper">
@@ -29,16 +35,27 @@
                             <tr>
                                 <th class="header_book" rowspan="2">書籍名</th>
                                 <th class="header_stock" rowspan="2">在庫数</th>
-                                <th class="header_days" th:colspan="${daysInMonth}" th:text="${targetYear + '年' + targetMonth + '月'}"></th>
+                                <th class="header_days" th:colspan="${daysInMonth}"
+                                    th:text="${targetYear + '年' + targetMonth + '月'}"></th>
                             </tr>
                             <tr class="days">
                                 <th th:each="day : ${daysOfWeek}" th:text="${day}"></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <!-- FIXME ControllerやService側の処理とともに表示方法を考える -->
-                                <td th:each="stock, stat : ${stocks}" th:text="${stock}"></td>
+                            <tr th:each="book : ${calendarList}">
+                                <td th:text="${book.title}"></td>
+                                <td th:text="${book.totalCount}"></td>
+                                <th:block th:each="stock, stat : ${book.dailyDetail}">
+                                    <th:block th:if="${stock.dailyCount == 0}">
+                                        <td>x</td>
+                                    </th:block>
+                                    <th:block th:if="${stock.dailyCount >= 1}">
+                                        <td> <a th:text="${stock.dailyCount}"
+                                                th:href="@{/rental/add(stockId=${stock.stockId}, expectedRentalOn=${#dates.format(stock.expectedRentalOn, 'yyyy-MM-dd')})}"
+                                                class="link"></a></td>
+                                    </th:block>
+                                </th:block>
                             </tr>
                         </tbody>
                     </table>
